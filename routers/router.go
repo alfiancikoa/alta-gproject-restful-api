@@ -11,7 +11,7 @@ import (
 func New() *echo.Echo {
 	e := echo.New()
 	// ------------------------------------------------------------------
-	// LOGIN Authentication REGISTER USER
+	// LOGIN & REGISTER USER
 	// ------------------------------------------------------------------
 	e.POST("/users", user.CreateUserController)
 	e.POST("/login", user.LoginUsersController)
