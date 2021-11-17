@@ -2,6 +2,7 @@ package user
 
 import (
 	"alte/e-commerce/lib/database"
+	"alte/e-commerce/middlewares"
 	"alte/e-commerce/models"
 	"alte/e-commerce/responses"
 	"net/http"
@@ -10,42 +11,38 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Function Get All user Controller
-func GetAllUsersController(c echo.Context) error {
-	respon, err := database.GetAllUser()
+// Login User Controller
+func LoginUsersController(c echo.Context) error {
+	var user models.User
+	c.Bind(&user)
+	respon, err := database.Login(&user)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"status": "failed", "message": "login failed",
+		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Success get all user", "data": respon,
+		"code":   200,
+		"status": "success", "data": respon,
 	})
 }
 
-// Function Get All User By ID Controller
-func GetUserController(c echo.Context) error {
+// GET user by id User
+func GetUserByIdController(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
-	user, err := database.GetUserId(id)
+	loggedInUserId := middlewares.ExtractTokenUserId(c)
+	if loggedInUserId != id {
+		return c.JSON(http.StatusUnauthorized, responses.UnAuthorized())
+	}
+	users, err := database.GetUserId(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
-	if user == nil {
-		return c.JSON(http.StatusNotFound, responses.DataNotExist())
-	}
-	respon := GetUserResponse{
-		Name:        user.Name,
-		Email:       user.Email,
-		Password:    user.Password,
-		PhoneNumber: user.PhoneNumber,
-		Gender:      user.Gender,
-		Birth:       user.Birth,
-	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success get user",
-		"data":    respon,
+		"status": "Success", "message": "Success get user detail", "data": users,
 	})
 }
 
@@ -84,6 +81,10 @@ func UpdateUserController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
+	loggedInUserId := middlewares.ExtractTokenUserId(c)
+	if loggedInUserId != id {
+		return c.JSON(http.StatusUnauthorized, responses.UnAuthorized())
+	}
 	userRequest := EditUserRequest{}
 	if err := c.Bind(&userRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
@@ -118,6 +119,10 @@ func DeleteUserController(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
+	}
+	loggedInUserId := middlewares.ExtractTokenUserId(c)
+	if loggedInUserId != id {
+		return c.JSON(http.StatusUnauthorized, responses.UnAuthorized())
 	}
 	respon, e := database.DeleteUser(id)
 	if e != nil {

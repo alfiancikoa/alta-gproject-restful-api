@@ -2,17 +2,25 @@ package database
 
 import (
 	"alte/e-commerce/config"
+	"alte/e-commerce/middlewares"
 	"alte/e-commerce/models"
 )
 
-// Query Get All User
-func GetAllUser() (interface{}, error) {
-	var users []models.User
-	// Jika ada error
-	if err := config.DB.Find(&users).Error; err != nil {
+// Login User JWT
+func Login(user *models.User) (*models.User, error) {
+	tx := config.DB.Where("email=? AND password=?", user.Email, user.Password).First(user)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	var err error
+	user.Token, err = middlewares.CreateToken(int(user.ID))
+	if err != nil {
 		return nil, err
 	}
-	return users, nil
+	if e := config.DB.Save(user).Error; e != nil {
+		return nil, e
+	}
+	return user, nil
 }
 
 // Query Get user by Id
@@ -47,6 +55,9 @@ func EditUser(newUser *models.User, userId int) (*models.User, error) {
 	user.Name = newUser.Name
 	user.Email = newUser.Email
 	user.Password = newUser.Password
+	user.PhoneNumber = newUser.PhoneNumber
+	user.Gender = newUser.Gender
+	user.Birth = newUser.Birth
 	if tx.RowsAffected > 0 {
 		if err := config.DB.Save(&user).Error; err != nil {
 			return nil, err

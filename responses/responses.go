@@ -1,5 +1,12 @@
 package responses
 
+//Access Forbidden
+func UnAuthorized() interface{} {
+	return map[string]interface{}{
+		"status": "failed", "message": "Access Forbiddenr",
+	}
+}
+
 //InternalServerErrorResponse default internal server error response
 func InternalServerErrorResponse() interface{} {
 	return map[string]interface{}{
