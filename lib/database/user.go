@@ -36,7 +36,7 @@ func GetUserId(userId int) (*models.User, error) {
 	return nil, nil
 }
 
-// Query Create New User
+// Query Create New User Jwts
 func InsertUser(user models.User) (*models.User, error) {
 	tx := config.DB.Save(&user)
 	if tx.Error != nil {
