@@ -16,7 +16,7 @@ type User struct {
 	Birth       string    `gorm:"type:date" json:"birth" form:"birth"`
 	Token       string    `gorm:"type:longtext;" json:"token" form:"token"`
 	Role        string    `gorm:"type:enum('admin','user');"`
-	Products    []Product `gorm:"foreignKey:User_ID;references:ID"`
+	Products    []Product `gorm:"foreignKey:User_ID;references:ID;constraint:OnDelete:CASCADE"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`

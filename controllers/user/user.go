@@ -109,9 +109,6 @@ func UpdateUserController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
-	if respon == nil {
-		return c.JSON(http.StatusNotFound, responses.DataNotExist())
-	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "success edit user",
@@ -129,15 +126,27 @@ func DeleteUserController(c echo.Context) error {
 	if loggedInUserId != id {
 		return c.JSON(http.StatusUnauthorized, responses.UnAuthorized())
 	}
-	respon, e := database.DeleteUser(id)
+	_, e := database.DeleteUser(id)
 	if e != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
-	}
-	if respon == nil {
-		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "success deleted user",
 	})
+}
+
+// Testing Get User
+func GetUserByIdControllerTesting() echo.HandlerFunc {
+	return GetUserByIdController
+}
+
+// Testing Edit User
+func UpdateUserControllerTesting() echo.HandlerFunc {
+	return UpdateUserController
+}
+
+// Testing Detele User
+func DeleteUserControllerTesting() echo.HandlerFunc {
+	return DeleteUserController
 }
