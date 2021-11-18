@@ -23,6 +23,7 @@ func New() *echo.Echo {
 	e.POST("/shipping/type", shipping.CreateShipTypeController)
 	e.GET("/shipping", shipping.GetShippingController)
 	e.POST("/shipping", shipping.CreateShippingController)
+	e.DELETE("/shipping/:id", shipping.DeleteShippingController)
 	// ------------------------------------------------------------------
 	// JWT Authentication
 	// ------------------------------------------------------------------

@@ -39,10 +39,24 @@ func ShippingInsert(shiping models.Shipping) (*models.Shipping, error) {
 }
 
 // Query Select * From Shipping
-func ShippingTpingGet() (interface{}, error) {
+func ShippingGet() (interface{}, error) {
 	var shipping []models.Shipping
 	if err := config.DB.Find(&shipping).Error; err != nil {
 		return nil, err
 	}
 	return shipping, nil
+}
+
+// Query Delete Sipping
+func ShippingDelete(shippingId int) (*models.Shipping, error) {
+	var shipping models.Shipping
+	tx := config.DB.Delete(&shipping, shippingId)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	if tx.RowsAffected > 0 {
+		return &shipping, nil
+	}
+	return nil, nil
+
 }

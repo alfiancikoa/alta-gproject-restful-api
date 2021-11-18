@@ -5,6 +5,7 @@ import (
 	"alte/e-commerce/models"
 	"alte/e-commerce/responses"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -72,11 +73,30 @@ func CreateShippingController(c echo.Context) error {
 
 // Function Show All Shipping
 func GetShippingController(c echo.Context) error {
-	respon, err := database.ShippingTpingGet()
+	respon, err := database.ShippingGet()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Success get all ship type", "data": respon,
+	})
+}
+
+// Function Delete Shipping By ID Controller
+func DeleteShippingController(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
+	}
+	respon, e := database.ShippingDelete(id)
+	if e != nil {
+		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
+	}
+	if respon == nil {
+		return c.JSON(http.StatusNotFound, responses.DataNotExist())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"code":    200,
+		"message": "Success deleted user",
 	})
 }
