@@ -390,7 +390,7 @@ func TestUpdateUserSuccess(t *testing.T) {
 		t.Error(t, err, "error marshal")
 	}
 
-	req := httptest.NewRequest(http.MethodPut, "/users:id", bytes.NewBuffer(newbody))
+	req := httptest.NewRequest(http.MethodPut, "/users/:id", bytes.NewBuffer(newbody))
 	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()

@@ -34,6 +34,7 @@ func New() *echo.Echo {
 	e.POST("/products/category", category.InsertCategoryController)
 	e.GET("/products/category", category.GetAllCategorysController)
 	eJWT.GET("/products", product.GetAllProductsController)
+	eJWT.GET("/products/:id", product.GetProductController)
 	eJWT.GET("/myproducts", product.GetMyProductController)
 	eJWT.POST("/products", product.CreateProductsController)
 	eJWT.DELETE("/products/:id", product.DeleteProductController)
