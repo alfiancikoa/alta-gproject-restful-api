@@ -33,6 +33,23 @@ func InsertCategory(category models.Category) (*models.Category, error) {
 	return &category, nil
 }
 
+func EditCategory(newCategory *models.Category, Id int) (*models.Category, error) {
+	category := models.Category{}
+	tx := config.DB.Find(&category, Id)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	category.Title = newCategory.Title
+	if tx.RowsAffected > 0 {
+		if err := config.DB.Save(&category).Error; err != nil {
+			return nil, err
+		} else {
+			return &category, nil
+		}
+	}
+	return nil, nil
+}
+
 func DeleteCategory(Id int) (*models.Category, error) {
 	category := models.Category{}
 	tx := config.DB.Delete(&category, Id)

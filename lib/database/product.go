@@ -13,12 +13,16 @@ func GetAllProducts() ([]models.Product, error) {
 	return products, nil
 }
 
-func GetProductByID(id int) (models.Product, error) {
+func GetProductByID(id int) (*models.Product, error) {
 	var product models.Product
-	if err := config.DB.Where("ID_Product = ?", id).Find(&product).Error; err != nil {
-		return product, err
+	tx := config.DB.Find(&product, id)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
-	return product, nil
+	if tx.RowsAffected > 0 {
+		return &product, nil
+	}
+	return nil, nil
 }
 
 func GetProductByCategory(name string) (models.Product, error) {
@@ -36,31 +40,35 @@ func CreateProduct(product models.Product) (models.Product, error) {
 	return product, nil
 }
 
-func UpdateProduct(id int, newProduct models.Product) (models.Product, error) {
+func UpdateProduct(newProduct *models.Product, Id int) (*models.Product, error) {
 	product := models.Product{}
-	if err := config.DB.First(&product, id).Error; err != nil {
-		return product, err
+	tx := config.DB.Find(&product, Id)
+	if tx.Error != nil {
+		return nil, tx.Error
 	}
+	product.Title = newProduct.Title
+	product.Desc = newProduct.Desc
+	product.Price = newProduct.Price
+	product.Status = newProduct.Status
 
-	product.Product_Title = newProduct.Product_Title
-	product.CategoryID = newProduct.CategoryID
-	product.PhotoID = newProduct.PhotoID
-	product.Product_Desc = newProduct.Product_Desc
-	product.Product_Price = newProduct.Product_Price
-	product.Product_Status = newProduct.Product_Status
-
-	if err := config.DB.Save(&product).Error; err != nil {
-		return product, err
+	if tx.RowsAffected > 0 {
+		if err := config.DB.Save(&product).Error; err != nil {
+			return nil, err
+		} else {
+			return &product, nil
+		}
 	}
-
-	return product, nil
+	return nil, nil
 }
 
-func DeleteProduct(id int) error {
+func DeleteProduct(id int) (*models.Product, error) {
 	product := models.Product{}
-
-	if err := config.DB.Where("id = ?", id).Delete(&product).Error; err != nil {
-		return err
+	tx := config.DB.Where("id = ?", id).Delete(&product)
+	if err := tx.Error; err != nil {
+		return nil, err
 	}
-	return nil
+	if tx.RowsAffected > 0 {
+		return &product, nil
+	}
+	return nil, nil
 }
