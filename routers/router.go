@@ -2,6 +2,8 @@ package routers
 
 import (
 	"alte/e-commerce/constants"
+	"alte/e-commerce/controllers/category"
+	"alte/e-commerce/controllers/product"
 	"alte/e-commerce/controllers/shipping"
 	"alte/e-commerce/controllers/user"
 
@@ -27,7 +29,7 @@ func New() *echo.Echo {
 	// ------------------------------------------------------------------
 	// JWT Authentication
 	// ------------------------------------------------------------------
-	eJWT := e.Group("/jwt")
+	eJWT := e.Group("")
 	eJWT.Use(echoMid.JWT([]byte(constants.SECRET_JWT)))
 	// ------------------------------------------------------------------
 	// USERS ROUTER
@@ -35,6 +37,15 @@ func New() *echo.Echo {
 	eJWT.GET("/users/:id", user.GetUserByIdController)
 	eJWT.PUT("/users/:id", user.UpdateUserController)
 	eJWT.DELETE("/users/:id", user.DeleteUserController)
-
+	// ------------------------------------------------------------------
+	// CATEGORY & PRODUCT ROUTER
+	// ------------------------------------------------------------------
+	e.POST("/products/category", category.InsertCategoryController)
+	e.GET("/products/category", category.GetAllCategorysController)
+	eJWT.GET("/products", product.GetAllProductsController)
+	eJWT.GET("/myproducts", product.GetMyProductController)
+	eJWT.POST("/products", product.CreateProductsController)
+	eJWT.DELETE("/products/:id", product.DeleteProductController)
+	eJWT.PUT("/products/:id", product.UpdateProductController)
 	return e
 }

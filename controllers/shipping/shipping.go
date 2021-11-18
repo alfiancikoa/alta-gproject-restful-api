@@ -58,7 +58,7 @@ func CreateShippingController(c echo.Context) error {
 	shipping := models.Shipping{
 		Name:        newShipping.Name,
 		Cost:        newShipping.Cost,
-		ShipType_ID: uint(newShipping.ShipType_ID),
+		ShipType_ID: newShipping.ShipType_ID,
 	}
 	respon, err := database.ShippingInsert(shipping)
 	if err != nil {
