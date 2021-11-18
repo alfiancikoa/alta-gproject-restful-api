@@ -5,9 +5,19 @@ import (
 	"alte/e-commerce/models"
 )
 
+// Query Get All Products
 func GetAllProducts() ([]models.Product, error) {
 	var products []models.Product
 	if err := config.DB.Find(&products).Error; err != nil {
+		return nil, err
+	}
+	return products, nil
+}
+
+// Query Get All my Products
+func GetMyProducts(user_id uint) ([]models.Product, error) {
+	var products []models.Product
+	if err := config.DB.Where("user_id=?", user_id).Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return products, nil
@@ -40,9 +50,9 @@ func CreateProduct(product models.Product) (models.Product, error) {
 	return product, nil
 }
 
-func UpdateProduct(newProduct *models.Product, Id int) (*models.Product, error) {
+func UpdateProduct(newProduct *models.Product, Id int, user_id int) (*models.Product, error) {
 	product := models.Product{}
-	tx := config.DB.Find(&product, Id)
+	tx := config.DB.Where("user_id=?", user_id).Find(&product, Id)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -61,9 +71,9 @@ func UpdateProduct(newProduct *models.Product, Id int) (*models.Product, error) 
 	return nil, nil
 }
 
-func DeleteProduct(id int) (*models.Product, error) {
+func DeleteProduct(id, user_id int) (*models.Product, error) {
 	product := models.Product{}
-	tx := config.DB.Where("id = ?", id).Delete(&product)
+	tx := config.DB.Where("id = ? AND user_id=?", id, user_id).Delete(&product)
 	if err := tx.Error; err != nil {
 		return nil, err
 	}

@@ -3,7 +3,7 @@ package responses
 //Access Forbidden
 func UnAuthorized() interface{} {
 	return map[string]interface{}{
-		"status": "failed", "message": "Access Forbiddenr",
+		"status": "failed", "message": "Access Forbidden",
 	}
 }
 

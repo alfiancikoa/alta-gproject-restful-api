@@ -2,6 +2,7 @@ package product
 
 import (
 	"alte/e-commerce/lib/database"
+	"alte/e-commerce/middlewares"
 	"alte/e-commerce/models"
 	"alte/e-commerce/responses"
 	"net/http"
@@ -15,7 +16,6 @@ func CreateProductsController(c echo.Context) error {
 	if err := c.Bind(&newProduct); err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
 	}
-
 	if newProduct.Title == "" || newProduct.Desc == "" || newProduct.Price <= 0 || newProduct.Status == "" || newProduct.Category_ID <= 0 {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
@@ -26,27 +26,43 @@ func CreateProductsController(c echo.Context) error {
 		Status:      newProduct.Status,
 		Category_ID: newProduct.Category_ID,
 	}
-
+	product.User_ID = middlewares.ExtractTokenUserId(c)
 	respon, err := database.CreateProduct(product)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 
 	return c.JSON(http.StatusCreated, map[string]interface{}{
-		"status": "success",
-		"data":   respon,
+		"status":  "success",
+		"message": "success create new product",
+		"data":    respon,
 	})
 }
 
 //find all product
 func GetAllProductsController(c echo.Context) error {
-	products, err := database.GetAllProducts()
+	respon, err := database.GetAllProducts()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success get all product",
-		"data":   products,
+		"status":  "success",
+		"message": "success get all product",
+		"data":    respon,
+	})
+}
+
+// Get All My Product
+func GetMyProductController(c echo.Context) error {
+	user_id := uint(middlewares.ExtractTokenUserId(c))
+	respon, err := database.GetMyProducts(user_id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status":  "success",
+		"message": "success get all product",
+		"data":    respon,
 	})
 }
 
@@ -71,8 +87,9 @@ func GetProductController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "Success get user",
-		"data":   respons,
+		"status":  "success",
+		"message": "Success get user",
+		"data":    respons,
 	})
 }
 
@@ -94,7 +111,8 @@ func UpdateProductController(c echo.Context) error {
 		Price:  productRequest.Price,
 		Status: productRequest.Status,
 	}
-	respon, err := database.UpdateProduct(&product, id)
+	user_id := middlewares.ExtractTokenUserId(c)
+	respon, err := database.UpdateProduct(&product, id, user_id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
@@ -112,8 +130,8 @@ func DeleteProductController(c echo.Context) error {
 	if err != nil || id < 1 {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
-
-	respon, err := database.DeleteProduct(id)
+	user_id := middlewares.ExtractTokenUserId(c)
+	respon, err := database.DeleteProduct(id, user_id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
@@ -121,6 +139,6 @@ func DeleteProductController(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "product succesfully deleted",
+		"status": "success", "message": "product succesfully deleted",
 	})
 }

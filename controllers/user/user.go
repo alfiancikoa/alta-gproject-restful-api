@@ -14,7 +14,9 @@ import (
 // Login User Controller
 func LoginUsersController(c echo.Context) error {
 	var user models.User
-	c.Bind(&user)
+	if err := c.Bind(&user); err != nil {
+		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
+	}
 	respon, err := database.Login(&user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -22,8 +24,8 @@ func LoginUsersController(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":   200,
-		"status": "success", "data": respon,
+		"status":  "success",
+		"message": "login success", "data": respon,
 	})
 }
 
@@ -42,7 +44,9 @@ func GetUserByIdController(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "Success", "message": "Success get user detail", "data": users,
+		"status":  "success",
+		"message": "success get user detail",
+		"data":    users,
 	})
 }
 
@@ -62,6 +66,7 @@ func CreateUserController(c echo.Context) error {
 		PhoneNumber: newUser.PhoneNumber,
 		Gender:      newUser.Gender,
 		Birth:       newUser.Birth,
+		Role:        "user",
 	}
 	respon, err := database.InsertUser(user)
 	if err != nil {
@@ -69,8 +74,8 @@ func CreateUserController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success create a new user",
+		"status":  "success",
+		"message": "success create a new user",
 		"data":    respon,
 	})
 }
@@ -108,8 +113,8 @@ func UpdateUserController(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success edit user",
+		"status":  "success",
+		"message": "success edit user",
 		"data":    respon,
 	})
 }
@@ -132,7 +137,7 @@ func DeleteUserController(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success deleted user",
+		"status":  "success",
+		"message": "success deleted user",
 	})
 }

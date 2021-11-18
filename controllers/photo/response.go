@@ -5,5 +5,5 @@ type PostPhoto struct {
 	Size       string `json:"size" form:"size"`
 	Resolution string `json:"resolution" form:"resolution"`
 	Link       string `json:"link" form:"link"`
-	Product_ID uint
+	Product_ID int
 }

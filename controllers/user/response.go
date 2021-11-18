@@ -16,6 +16,7 @@ type PostUserRequest struct {
 	PhoneNumber string `json:"phonenumber" form:"phonenumber"`
 	Gender      string `json:"gender" form:"gender"`
 	Birth       string `json:"birth" form:"birth"`
+	Role        string `json:"role" form:"role"`
 }
 
 type EditUserRequest struct {
