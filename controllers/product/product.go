@@ -32,7 +32,7 @@ func CreateProductsController(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 
-	return c.JSON(http.StatusCreated, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "success create new product",
 		"data":    respon,
@@ -54,7 +54,7 @@ func GetAllProductsController(c echo.Context) error {
 
 // Get All My Product
 func GetMyProductController(c echo.Context) error {
-	user_id := uint(middlewares.ExtractTokenUserId(c))
+	user_id := middlewares.ExtractTokenUserId(c)
 	respon, err := database.GetMyProducts(user_id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
@@ -79,16 +79,16 @@ func GetProductController(c echo.Context) error {
 	if product == nil {
 		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
-	respons := GetProductResponse{
+	respons := models.Product{
+		ID:     product.ID,
 		Title:  product.Title,
 		Desc:   product.Desc,
 		Price:  product.Price,
 		Status: product.Status,
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
-		"message": "Success get user",
+		"message": "success get product",
 		"data":    respons,
 	})
 }
@@ -127,7 +127,7 @@ func UpdateProductController(c echo.Context) error {
 
 func DeleteProductController(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil || id < 1 {
+	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
 	user_id := middlewares.ExtractTokenUserId(c)
@@ -141,4 +141,24 @@ func DeleteProductController(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status": "success", "message": "product succesfully deleted",
 	})
+}
+
+// Testing Get User
+func GetMyProductControllerTesting() echo.HandlerFunc {
+	return GetMyProductController
+}
+
+// Testing Update User
+func UpdateProductControllerTesting() echo.HandlerFunc {
+	return UpdateProductController
+}
+
+// Testing Delete User
+func DeleteProductControllerTesting() echo.HandlerFunc {
+	return DeleteProductController
+}
+
+// Testing Create User
+func CreateProductsControllerTesting() echo.HandlerFunc {
+	return CreateProductsController
 }

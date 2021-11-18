@@ -15,7 +15,7 @@ func GetAllProducts() ([]models.Product, error) {
 }
 
 // Query Get All my Products
-func GetMyProducts(user_id uint) ([]models.Product, error) {
+func GetMyProducts(user_id int) ([]models.Product, error) {
 	var products []models.Product
 	if err := config.DB.Where("user_id=?", user_id).Find(&products).Error; err != nil {
 		return nil, err
