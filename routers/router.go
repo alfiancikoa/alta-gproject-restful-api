@@ -2,6 +2,7 @@ package routers
 
 import (
 	"alte/e-commerce/constants"
+	"alte/e-commerce/controllers/shipping"
 	"alte/e-commerce/controllers/user"
 
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,14 @@ func New() *echo.Echo {
 	// ------------------------------------------------------------------
 	e.POST("/users", user.CreateUserController)
 	e.POST("/login", user.LoginUsersController)
+	// ------------------------------------------------------------------
+	// SHIPPING Routers
+	// ------------------------------------------------------------------
+	e.GET("/shipping/type", shipping.GetShipTypeController)
+	e.POST("/shipping/type", shipping.CreateShipTypeController)
+	e.GET("/shipping", shipping.GetShippingController)
+	e.POST("/shipping", shipping.CreateShippingController)
+	e.DELETE("/shipping/:id", shipping.DeleteShippingController)
 	// ------------------------------------------------------------------
 	// JWT Authentication
 	// ------------------------------------------------------------------
