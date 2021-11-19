@@ -1,9 +1,9 @@
 package user
 
 type GetUserResponse struct {
+	ID          int
 	Name        string `json:"name" form:"name"`
 	Email       string `json:"email" form:"email"`
-	Password    string `json:"password" form:"password"`
 	PhoneNumber string `json:"phonenumber" form:"phonenumber"`
 	Gender      string `json:"gender" form:"gender"`
 	Birth       string `json:"birth" form:"birth"`

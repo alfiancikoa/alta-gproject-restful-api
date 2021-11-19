@@ -48,10 +48,18 @@ func GetUserByIdController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
+	respon := GetUserResponse{
+		ID:          users.ID,
+		Name:        users.Name,
+		Email:       users.Email,
+		PhoneNumber: users.PhoneNumber,
+		Gender:      users.Gender,
+		Birth:       users.Birth,
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "success get user detail",
-		"data":    users,
+		"data":    respon,
 	})
 }
 
@@ -74,8 +82,7 @@ func CreateUserController(c echo.Context) error {
 		Birth:       newUser.Birth,
 		Role:        "user",
 	}
-	_, err := database.InsertUser(user)
-	if err != nil {
+	if _, err := database.InsertUser(user); err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -101,22 +108,21 @@ func UpdateUserController(c echo.Context) error {
 	if userRequest.Name == "" || userRequest.Email == "" || userRequest.Password == "" {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
+	xpass, _ := database.EncryptPassword(userRequest.Password)
 	user := models.User{
 		Name:        userRequest.Name,
 		Email:       userRequest.Email,
-		Password:    userRequest.Password,
+		Password:    xpass,
 		PhoneNumber: userRequest.PhoneNumber,
 		Gender:      userRequest.Gender,
 		Birth:       userRequest.Birth,
 	}
-	respon, err := database.EditUser(&user, id)
-	if err != nil {
+	if _, err := database.EditUser(&user, id); err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "success edit user",
-		"data":    respon,
 	})
 }
 
