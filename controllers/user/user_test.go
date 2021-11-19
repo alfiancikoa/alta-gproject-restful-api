@@ -3,12 +3,12 @@ package user
 import (
 	"alte/e-commerce/config"
 	"alte/e-commerce/constants"
+	"alte/e-commerce/lib/database"
 	"alte/e-commerce/middlewares"
 	"alte/e-commerce/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,7 +16,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func InitEchoTestAPI() *echo.Echo {
@@ -58,8 +57,11 @@ var (
 		Role:        "user",
 	}
 )
+var xpass string
 
 func InsertMockDataUserToDB() error {
+	xpass, _ = database.EncryptPassword(mock_data_user.Password)
+	mock_data_user.Password = xpass
 	var err error
 	if err = config.DB.Save(&mock_data_user).Error; err != nil {
 		return err
@@ -78,10 +80,8 @@ func TestLoginJWTSuccess(t *testing.T) {
 	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(logininfo))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
-
 	contex := e.NewContext(req, rec)
 	contex.SetPath("/login")
-
 	if assert.NoError(t, LoginUsersController(contex)) {
 		bodyResponses := rec.Body.String()
 		var user SingleUserResponseSuccess
@@ -91,95 +91,94 @@ func TestLoginJWTSuccess(t *testing.T) {
 		}
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, "success", user.Status)
-		assert.Equal(t, "fian@gmail.com", user.Data.Email)
-		assert.Equal(t, "admin", user.Data.Password)
+		assert.Equal(t, "login success", user.Message)
 	}
 }
 
 func TestLoginJWTFailed(t *testing.T) {
-	var logininfo = []LoginUserRequest{
-		{
-			// Email: Benar; Password: Salah
-			Email:    "fian@gmail.com",
-			Password: "salah",
-		}, {
-			// Email: Salah; Password: Benar
-			Email:    "salah@gmail.com",
-			Password: "admin",
-		}, {
-			// Email: Salah; Password: Salah
-			Email:    "salah@gmail.com",
-			Password: "salah",
-		},
-	}
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
-	for _, loginlist := range logininfo {
-		logininfo, err := json.Marshal(loginlist)
-		log.Println("logininfo", string(logininfo))
-		if err != nil {
-			t.Error(t, err, "error marshal")
-		}
-		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(logininfo))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		rec := httptest.NewRecorder()
-
-		contex := e.NewContext(req, rec)
-		contex.SetPath("/login")
-
-		if assert.NoError(t, LoginUsersController(contex)) {
-			body := rec.Body.String()
-			var respon ResponseFailed
-			err := json.Unmarshal([]byte(body), &respon)
-			if err != nil {
-				assert.Error(t, err, "error marshal")
-			}
-			require.Equal(t, http.StatusBadRequest, rec.Code)
-			require.Equal(t, "failed", respon.Status)
-			require.Equal(t, "login failed", respon.Message)
-		}
-	}
-}
-
-func TestLoginJWTFailedBind(t *testing.T) {
-	e := InitEchoTestAPI()
-	InsertMockDataUserToDB()
-	logininfo, err := json.Marshal(LoginUserRequestErr{})
+	logininfo, err := json.Marshal(LoginUserRequest{Email: "fian@gmail.com", Password: "admin"})
 	if err != nil {
 		t.Error(t, err, "error marshal")
 	}
-	// send data using request body with HTTP method POST
-	req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(logininfo))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-
-	contex := e.NewContext(req, rec)
-	contex.SetPath("/login")
-
-	if assert.NoError(t, LoginUsersController(contex)) {
-		bodyResponses := rec.Body.String()
-		var user SingleUserResponseSuccess
-		err := json.Unmarshal([]byte(bodyResponses), &user)
+	t.Run("TestLogin_InvalidInput", func(t *testing.T) {
+		logininfo, err := json.Marshal(LoginUserRequest{Email: "fian@gmail.com", Password: "admins"})
 		if err != nil {
-			assert.Error(t, err, "error marshal")
+			t.Error(t, err, "error marshal")
 		}
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.Equal(t, "failed", user.Status)
-		assert.Equal(t, "Bad Request", user.Message)
-	}
+		// send data using request body with HTTP method POST
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(logininfo))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		contex := e.NewContext(req, rec)
+		contex.SetPath("/login")
+		if assert.NoError(t, LoginUsersController(contex)) {
+			bodyResponses := rec.Body.String()
+			var user SingleUserResponseSuccess
+			err := json.Unmarshal([]byte(bodyResponses), &user)
+			if err != nil {
+				assert.Error(t, err, "error marshal")
+			}
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.Equal(t, "failed", user.Status)
+			assert.Equal(t, "Incorrect Email or Password", user.Message)
+		}
+	})
+	t.Run("TestLogin_ErrorBind", func(t *testing.T) {
+		loginfo, err := json.Marshal(LoginUserRequestErr{})
+		if err != nil {
+			t.Error(t, err, "error marshal")
+		}
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(loginfo))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		contex := e.NewContext(req, rec)
+		contex.SetPath("/login")
+		if assert.NoError(t, LoginUsersController(contex)) {
+			bodyResponses := rec.Body.String()
+			var user SingleUserResponseSuccess
+			err := json.Unmarshal([]byte(bodyResponses), &user)
+			if err != nil {
+				assert.Error(t, err, "error marshal")
+			}
+			assert.Equal(t, http.StatusBadRequest, rec.Code)
+			assert.Equal(t, "failed", user.Status)
+			assert.Equal(t, "Bad Request", user.Message)
+		}
+	})
+	t.Run("TestLogin_ErrorDB", func(t *testing.T) {
+		config.DB.Migrator().DropTable(&models.User{})
+		req := httptest.NewRequest(http.MethodPost, "/login", bytes.NewBuffer(logininfo))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		contex := e.NewContext(req, rec)
+		contex.SetPath("/login")
+		if assert.NoError(t, LoginUsersController(contex)) {
+			bodyResponses := rec.Body.String()
+			var user SingleUserResponseSuccess
+			err := json.Unmarshal([]byte(bodyResponses), &user)
+			if err != nil {
+				assert.Error(t, err, "error marshal")
+			}
+			assert.Equal(t, http.StatusInternalServerError, rec.Code)
+			assert.Equal(t, "failed", user.Status)
+			assert.Equal(t, "Server Internal Error", user.Message)
+		}
+	})
 }
 
 func TestGetUserByIdSuccess(t *testing.T) {
 	e := InitEchoTestAPI()
-	InsertMockDataUserToDB() //create token
+	InsertMockDataUserToDB()
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email=? AND password=?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
 	token, err := middlewares.CreateToken(int(userDetail.ID))
 	if err != nil {
-		panic(err)
+		t.Error("error create token")
 	}
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
@@ -207,7 +206,7 @@ func TestGetGetUserByIdFailed(t *testing.T) {
 	InsertMockDataUserToDB()
 	//create token
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -291,9 +290,8 @@ func TestCreateUserSuccess(t *testing.T) {
 			assert.Error(t, err, "error marshal")
 		}
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, "fian", user.Data.Name)
-		assert.Equal(t, "fian@gmail.com", user.Data.Email)
-		assert.Equal(t, "admin", user.Data.Password)
+		assert.Equal(t, "success", user.Status)
+		assert.Equal(t, "success create a new user", user.Message)
 	}
 }
 
@@ -369,7 +367,7 @@ func TestUpdateUserSuccess(t *testing.T) {
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -399,21 +397,19 @@ func TestUpdateUserSuccess(t *testing.T) {
 	context.SetParamNames("id")
 	context.SetParamValues("1")
 	middleware.JWT([]byte(constants.SECRET_JWT))(UpdateUserControllerTesting())(context)
-
 	var user SingleUserResponseSuccess
 	body := res.Body.String()
 	json.Unmarshal([]byte(body), &user)
 	assert.Equal(t, http.StatusOK, res.Code)
-	assert.Equal(t, "fianUpdate", user.Data.Name)
-	assert.Equal(t, "fian@gmail.com", user.Data.Email)
-	assert.Equal(t, "admin", user.Data.Password)
+	assert.Equal(t, "success", user.Status)
+	assert.Equal(t, "success edit user", user.Message)
 }
 
 func TestUpdateUserFailed(t *testing.T) {
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -538,7 +534,7 @@ func TestDeleteUserSuccess(t *testing.T) {
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -569,7 +565,7 @@ func TestDeleteUserFailed(t *testing.T) {
 	t.Run("TestDEL_InvalidMethod", func(t *testing.T) {
 		InsertMockDataUserToDB()
 		var userDetail models.User
-		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 		if tx.Error != nil {
 			t.Error(tx.Error)
 		}
@@ -596,7 +592,7 @@ func TestDeleteUserFailed(t *testing.T) {
 	t.Run("TestDEL_InvalidID", func(t *testing.T) {
 		InsertMockDataUserToDB()
 		var userDetail models.User
-		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 		if tx.Error != nil {
 			t.Error(tx.Error)
 		}
@@ -623,7 +619,7 @@ func TestDeleteUserFailed(t *testing.T) {
 	t.Run("TestDEL_ErrorDB", func(t *testing.T) {
 		InsertMockDataUserToDB()
 		var userDetail models.User
-		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 		if tx.Error != nil {
 			t.Error(tx.Error)
 		}
