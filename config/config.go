@@ -43,4 +43,24 @@ func InitDB() {
 // Function Initial Migration
 func InitalMigration() {
 	DB.AutoMigrate(&models.User{})
+	DB.AutoMigrate(&models.Category{})
+	DB.AutoMigrate(&models.Product{})
+	DB.AutoMigrate(&models.Ship_Type{})
+	DB.AutoMigrate(&models.Shipping{})
+}
+
+func InitDBTest() {
+	connect := "root:@tcp(127.0.0.1:3306)/project_test?charset=utf8&parseTime=True&loc=Local"
+	var err error
+	DB, err = gorm.Open(mysql.Open(connect), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	InitialMigrationTest()
+}
+func InitialMigrationTest() {
+	DB.Migrator().DropTable(&models.Product{})
+	DB.AutoMigrate(&models.Product{})
+	DB.Migrator().DropTable(&models.User{})
+	DB.AutoMigrate(&models.User{})
 }

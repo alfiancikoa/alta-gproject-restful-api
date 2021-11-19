@@ -2,6 +2,7 @@ package user
 
 import (
 	"alte/e-commerce/lib/database"
+	"alte/e-commerce/middlewares"
 	"alte/e-commerce/models"
 	"alte/e-commerce/responses"
 	"net/http"
@@ -10,41 +11,54 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Function Get All user Controller
-func GetAllUsersController(c echo.Context) error {
-	respon, err := database.GetAllUser()
-	if err != nil {
+// Login User Controller
+func LoginUsersController(c echo.Context) error {
+	var userlogin models.User
+	if err := c.Bind(&userlogin); err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "Success get all user", "data": respon,
-	})
-}
-
-// Function Get All User By ID Controller
-func GetUserController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
-	}
-	user, err := database.GetUserId(id)
+	user, err := database.GetUserByEmail(userlogin)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 	if user == nil {
-		return c.JSON(http.StatusNotFound, responses.DataNotExist())
+		return c.JSON(http.StatusBadRequest, responses.InvalidEmailPassword())
 	}
-	respon := GetUserResponse{
-		Name:        user.Name,
-		Email:       user.Email,
-		Password:    user.Password,
-		PhoneNumber: user.PhoneNumber,
-		Gender:      user.Gender,
-		Birth:       user.Birth,
+	respon, err := database.GenerateToken(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.LoginFailed())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success get user",
+		"status":  "success",
+		"message": "login success", "data": respon.Token,
+	})
+}
+
+// GET user by id User
+func GetUserByIdController(c echo.Context) error {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
+	}
+	loggedInUserId := middlewares.ExtractTokenUserId(c)
+	if loggedInUserId != id {
+		return c.JSON(http.StatusUnauthorized, responses.UnAuthorized())
+	}
+	users, err := database.GetUserId(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
+	}
+	respon := GetUserResponse{
+		ID:          users.ID,
+		Name:        users.Name,
+		Email:       users.Email,
+		PhoneNumber: users.PhoneNumber,
+		Gender:      users.Gender,
+		Birth:       users.Birth,
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"status":  "success",
+		"message": "success get user detail",
 		"data":    respon,
 	})
 }
@@ -58,23 +72,22 @@ func CreateUserController(c echo.Context) error {
 	if newUser.Name == "" || newUser.Email == "" || newUser.Password == "" {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
+	xpass, _ := database.EncryptPassword(newUser.Password)
 	user := models.User{
 		Name:        newUser.Name,
 		Email:       newUser.Email,
-		Password:    newUser.Password,
+		Password:    xpass,
 		PhoneNumber: newUser.PhoneNumber,
 		Gender:      newUser.Gender,
 		Birth:       newUser.Birth,
+		Role:        "user",
 	}
-	respon, err := database.InsertUser(user)
-	if err != nil {
+	if _, err := database.InsertUser(user); err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success create a new user",
-		"data":    respon,
+		"status":  "success",
+		"message": "success create a new user",
 	})
 }
 
@@ -84,6 +97,10 @@ func UpdateUserController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
+	loggedInUserId := middlewares.ExtractTokenUserId(c)
+	if loggedInUserId != id {
+		return c.JSON(http.StatusUnauthorized, responses.UnAuthorized())
+	}
 	userRequest := EditUserRequest{}
 	if err := c.Bind(&userRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
@@ -91,25 +108,21 @@ func UpdateUserController(c echo.Context) error {
 	if userRequest.Name == "" || userRequest.Email == "" || userRequest.Password == "" {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
+	xpass, _ := database.EncryptPassword(userRequest.Password)
 	user := models.User{
 		Name:        userRequest.Name,
 		Email:       userRequest.Email,
-		Password:    userRequest.Password,
+		Password:    xpass,
 		PhoneNumber: userRequest.PhoneNumber,
 		Gender:      userRequest.Gender,
 		Birth:       userRequest.Birth,
 	}
-	respon, err := database.EditUser(&user, id)
-	if err != nil {
+	if _, err := database.EditUser(&user, id); err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
-	if respon == nil {
-		return c.JSON(http.StatusNotFound, responses.DataNotExist())
-	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success edit user",
-		"data":    respon,
+		"status":  "success",
+		"message": "success edit user",
 	})
 }
 
@@ -119,15 +132,31 @@ func DeleteUserController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
-	respon, e := database.DeleteUser(id)
+	loggedInUserId := middlewares.ExtractTokenUserId(c)
+	if loggedInUserId != id {
+		return c.JSON(http.StatusUnauthorized, responses.UnAuthorized())
+	}
+	_, e := database.DeleteUser(id)
 	if e != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
-	if respon == nil {
-		return c.JSON(http.StatusNotFound, responses.DataNotExist())
-	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"code":    200,
-		"message": "Success deleted user",
+		"status":  "success",
+		"message": "success deleted user",
 	})
+}
+
+// Testing Get User
+func GetUserByIdControllerTesting() echo.HandlerFunc {
+	return GetUserByIdController
+}
+
+// Testing Edit User
+func UpdateUserControllerTesting() echo.HandlerFunc {
+	return UpdateUserController
+}
+
+// Testing Detele User
+func DeleteUserControllerTesting() echo.HandlerFunc {
+	return DeleteUserController
 }
