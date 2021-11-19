@@ -143,7 +143,7 @@ func UpdateProductController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
-		"message": "success update product",
+		"message": "product update successful",
 	})
 }
 
@@ -161,7 +161,7 @@ func DeleteProductController(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success", "message": "product succesfully deleted",
+		"status": "success", "message": "product deleted successfully",
 	})
 }
 
