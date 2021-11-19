@@ -4,11 +4,13 @@ import (
 	"alte/e-commerce/config"
 	"alte/e-commerce/middlewares"
 	"alte/e-commerce/models"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
-// Login User JWT
-func Login(user *models.User) (*models.User, error) {
-	tx := config.DB.Where("email=? AND password=?", user.Email, user.Password).First(user)
+func GenerateToken(userlogin *models.User) (*models.User, error) {
+	user := models.User{}
+	tx := config.DB.Where("id=?", userlogin.ID).First(&user)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -20,7 +22,21 @@ func Login(user *models.User) (*models.User, error) {
 	if e := config.DB.Save(user).Error; e != nil {
 		return nil, e
 	}
-	return user, nil
+	return &user, nil
+}
+
+// Query Get User by Email
+func GetUserByEmail(loginuser models.User) (*models.User, error) {
+	user := models.User{}
+	tx := config.DB.Where("email=?", loginuser.Email).First(&user)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	checkpass := DecryptPassword(loginuser.Password, user.Password)
+	if !checkpass {
+		return nil, nil
+	}
+	return &user, nil
 }
 
 // Query Get user by Id
@@ -79,4 +95,19 @@ func DeleteUser(userId int) (*models.User, error) {
 		return &user, nil
 	}
 	return nil, nil
+}
+
+// Encrypt the password user
+func EncryptPassword(password string) (string, error) {
+	Encrypt, err := bcrypt.GenerateFromPassword([]byte(password), 8)
+	if err != nil {
+		return "", err
+	}
+	return string(Encrypt), nil
+}
+
+// Decrypt the password user
+func DecryptPassword(password, encrypt string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(encrypt), []byte(password))
+	return err == nil
 }

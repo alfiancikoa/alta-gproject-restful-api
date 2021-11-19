@@ -616,12 +616,12 @@ func TestGetMyProductSuccess(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	req := httptest.NewRequest(http.MethodGet, "/myproducts", nil)
+	req := httptest.NewRequest(http.MethodGet, "/products/my", nil)
 	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	context := e.NewContext(req, res)
-	context.SetPath("/myproducts")
+	context.SetPath("/products/my")
 	middleware.JWT([]byte(constants.SECRET_JWT))(GetMyProductControllerTesting())(context)
 	var product ProductResponSuccess
 	body := res.Body.String()
@@ -647,12 +647,12 @@ func TestGetMyProductFailed(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	req := httptest.NewRequest(http.MethodGet, "/myproducts", nil)
+	req := httptest.NewRequest(http.MethodGet, "/products/my", nil)
 	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	context := e.NewContext(req, res)
-	context.SetPath("/myproducts")
+	context.SetPath("/products/my")
 	config.DB.Migrator().DropTable(&models.Product{})
 	middleware.JWT([]byte(constants.SECRET_JWT))(GetMyProductControllerTesting())(context)
 	var product ProductResponSuccess
