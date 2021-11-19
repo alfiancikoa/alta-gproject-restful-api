@@ -19,7 +19,7 @@ func LoginUsersController(c echo.Context) error {
 	}
 	user, err := database.GetUserByEmail(userlogin)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, responses.InvalidEmailPassword())
+		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 	if user == nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidEmailPassword())
