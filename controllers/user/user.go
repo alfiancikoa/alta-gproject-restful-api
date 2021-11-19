@@ -13,19 +13,24 @@ import (
 
 // Login User Controller
 func LoginUsersController(c echo.Context) error {
-	var user models.User
-	if err := c.Bind(&user); err != nil {
+	var userlogin models.User
+	if err := c.Bind(&userlogin); err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
 	}
-	respon, err := database.Login(&user)
+	user, err := database.GetUserByEmail(userlogin)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"status": "failed", "message": "login failed",
-		})
+		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
+	}
+	if user == nil {
+		return c.JSON(http.StatusBadRequest, responses.InvalidEmailPassword())
+	}
+	respon, err := database.GenerateToken(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, responses.LoginFailed())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
-		"message": "login success", "data": respon,
+		"message": "login success", "data": respon.Token,
 	})
 }
 
@@ -59,24 +64,23 @@ func CreateUserController(c echo.Context) error {
 	if newUser.Name == "" || newUser.Email == "" || newUser.Password == "" {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
+	xpass, _ := database.EncryptPassword(newUser.Password)
 	user := models.User{
 		Name:        newUser.Name,
 		Email:       newUser.Email,
-		Password:    newUser.Password,
+		Password:    xpass,
 		PhoneNumber: newUser.PhoneNumber,
 		Gender:      newUser.Gender,
 		Birth:       newUser.Birth,
 		Role:        "user",
 	}
-	respon, err := database.InsertUser(user)
+	_, err := database.InsertUser(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
-
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "success create a new user",
-		"data":    respon,
 	})
 }
 

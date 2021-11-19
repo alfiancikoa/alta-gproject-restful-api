@@ -7,6 +7,20 @@ func UnAuthorized() interface{} {
 	}
 }
 
+//Invalid Email or Password
+func InvalidEmailPassword() interface{} {
+	return map[string]interface{}{
+		"status": "failed", "message": "Incorrect Email or Password",
+	}
+}
+
+//Invalid password
+func LoginFailed() interface{} {
+	return map[string]interface{}{
+		"status": "failed", "message": "Fail to Login",
+	}
+}
+
 //InternalServerErrorResponse default internal server error response
 func InternalServerErrorResponse() interface{} {
 	return map[string]interface{}{

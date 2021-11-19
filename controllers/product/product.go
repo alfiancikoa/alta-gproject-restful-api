@@ -27,7 +27,7 @@ func CreateProductsController(c echo.Context) error {
 		Category_ID: newProduct.Category_ID,
 	}
 	product.User_ID = middlewares.ExtractTokenUserId(c)
-	respon, err := database.CreateProduct(product)
+	_, err := database.CreateProduct(product)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
@@ -35,15 +35,24 @@ func CreateProductsController(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "success create new product",
-		"data":    respon,
 	})
 }
 
 //find all product
 func GetAllProductsController(c echo.Context) error {
-	respon, err := database.GetAllProducts()
+	products, err := database.GetAllProducts()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
+	}
+	respon := make([]GetProductResponse, len(products))
+	for i := 0; i < len(products); i++ {
+		respon[i].ID = products[i].ID
+		respon[i].Title = products[i].Title
+		respon[i].Desc = products[i].Desc
+		respon[i].Price = products[i].Price
+		respon[i].Status = products[i].Status
+		respon[i].Category_ID = products[i].Category_ID
+		respon[i].User_ID = products[i].User_ID
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
@@ -55,9 +64,19 @@ func GetAllProductsController(c echo.Context) error {
 // Get All My Product
 func GetMyProductController(c echo.Context) error {
 	user_id := middlewares.ExtractTokenUserId(c)
-	respon, err := database.GetMyProducts(user_id)
+	products, err := database.GetMyProducts(user_id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
+	}
+	respon := make([]GetProductResponse, len(products))
+	for i := 0; i < len(products); i++ {
+		respon[i].ID = products[i].ID
+		respon[i].Title = products[i].Title
+		respon[i].Desc = products[i].Desc
+		respon[i].Price = products[i].Price
+		respon[i].Status = products[i].Status
+		respon[i].Category_ID = products[i].Category_ID
+		respon[i].User_ID = products[i].User_ID
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
@@ -79,12 +98,14 @@ func GetProductController(c echo.Context) error {
 	if product == nil {
 		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
-	respons := models.Product{
-		ID:     product.ID,
-		Title:  product.Title,
-		Desc:   product.Desc,
-		Price:  product.Price,
-		Status: product.Status,
+	respons := GetProductResponse{
+		ID:          product.ID,
+		Title:       product.Title,
+		Desc:        product.Desc,
+		Price:       product.Price,
+		Status:      product.Status,
+		Category_ID: product.Category_ID,
+		User_ID:     product.User_ID,
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
@@ -106,10 +127,11 @@ func UpdateProductController(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
 	product := models.Product{
-		Title:  productRequest.Title,
-		Desc:   productRequest.Desc,
-		Price:  productRequest.Price,
-		Status: productRequest.Status,
+		Title:       productRequest.Title,
+		Desc:        productRequest.Desc,
+		Price:       productRequest.Price,
+		Status:      productRequest.Status,
+		Category_ID: productRequest.Category_ID,
 	}
 	user_id := middlewares.ExtractTokenUserId(c)
 	respon, err := database.UpdateProduct(&product, id, user_id)
@@ -120,8 +142,8 @@ func UpdateProductController(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, responses.DataNotExist())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"status": "success",
-		"data":   respon,
+		"status":  "success",
+		"message": "success update product",
 	})
 }
 

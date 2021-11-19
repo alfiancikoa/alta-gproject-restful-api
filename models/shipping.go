@@ -17,7 +17,7 @@ type Ship_Type struct {
 type Shipping struct {
 	ID          int    `gorm:"primarykey"`
 	Name        string `gorm:"type:varchar(100);not null" json:"name" form:"name"`
-	Cost        int    `gorm:"type:int(10);not null" json:"cost" form:"cost"`
+	Cost        int    `gorm:"type:int;not null" json:"cost" form:"cost"`
 	ShipType_ID int    `json:"shiptype_id" form:"shiptype_id"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
