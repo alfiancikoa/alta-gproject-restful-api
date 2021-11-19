@@ -19,9 +19,7 @@ func GenerateToken(userlogin *models.User) (*models.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	if e := config.DB.Save(user).Error; e != nil {
-		return nil, e
-	}
+	config.DB.Save(user)
 	return &user, nil
 }
 

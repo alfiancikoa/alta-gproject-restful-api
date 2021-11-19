@@ -24,10 +24,7 @@ func LoginUsersController(c echo.Context) error {
 	if user == nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidEmailPassword())
 	}
-	respon, err := database.GenerateToken(user)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, responses.LoginFailed())
-	}
+	respon, _ := database.GenerateToken(user)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"status":  "success",
 		"message": "login success", "data": respon.Token,
