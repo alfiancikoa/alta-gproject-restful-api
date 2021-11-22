@@ -18,10 +18,7 @@ func LoginUsersController(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
 	}
 	user, err := database.GetUserByEmail(userlogin)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
-	}
-	if user == nil {
+	if err != nil || user == nil {
 		return c.JSON(http.StatusBadRequest, responses.InvalidEmailPassword())
 	}
 	respon, _ := database.GenerateToken(user)
@@ -79,7 +76,12 @@ func CreateUserController(c echo.Context) error {
 		Birth:       newUser.Birth,
 		Role:        "user",
 	}
-	if _, err := database.InsertUser(user); err != nil {
+	userDetail, err := database.InsertUser(user)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
+	}
+	cart := models.Cart{User_ID: userDetail.ID}
+	if e := database.CreateCart(cart); e != nil {
 		return c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse())
 	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
