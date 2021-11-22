@@ -52,7 +52,7 @@ var (
 		Title:       "Jaket Hoodie ERIGO",
 		Desc:        "size M",
 		Price:       50000,
-		Status:      "ready",
+		Stock:       1,
 		Category_ID: 1,
 		User_ID:     1,
 	}
@@ -338,7 +338,7 @@ func TestUpdateProductSuccess(t *testing.T) {
 		Title:       "Jaket Hoodie Update",
 		Desc:        "size L",
 		Price:       1000,
-		Status:      "ready",
+		Stock:       1,
 		Category_ID: 1,
 	}
 	newbody, err := json.Marshal(newdata)
@@ -379,7 +379,7 @@ func TestUpdateProductFailed(t *testing.T) {
 		Title:       "Jaket Hoodie Update",
 		Desc:        "size L",
 		Price:       1000,
-		Status:      "ready",
+		Stock:       1,
 		Category_ID: 1,
 	}
 	newbody, err := json.Marshal(newdata)

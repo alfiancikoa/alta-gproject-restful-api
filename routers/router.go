@@ -2,7 +2,9 @@ package routers
 
 import (
 	"alte/e-commerce/constants"
+	"alte/e-commerce/controllers/cart"
 	"alte/e-commerce/controllers/category"
+	"alte/e-commerce/controllers/order"
 	"alte/e-commerce/controllers/product"
 	"alte/e-commerce/controllers/user"
 
@@ -39,5 +41,18 @@ func New() *echo.Echo {
 	eJWT.POST("/products", product.CreateProductsController)
 	eJWT.DELETE("/products/:id", product.DeleteProductController)
 	eJWT.PUT("/products/:id", product.UpdateProductController)
+
+	// ------------------------------------------------------------------
+	// CART ROUTER
+	// ------------------------------------------------------------------
+	eJWT.POST("/carts", cart.CreateCartController)
+	eJWT.GET("/carts/my", cart.GetCartController)
+	eJWT.PUT("/carts/:id", cart.UpdateCartController)
+	eJWT.DELETE("/carts/:id", cart.DeleteCartController)
+	// ------------------------------------------------------------------
+	// CART ROUTER
+	// ------------------------------------------------------------------
+	eJWT.POST("/orders", order.CreateNewOrderController)
+	eJWT.GET("/orders", order.GetOrderController)
 	return e
 }

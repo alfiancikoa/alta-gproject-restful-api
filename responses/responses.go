@@ -28,6 +28,13 @@ func InternalServerErrorResponse() interface{} {
 	}
 }
 
+//Data Already Exist response
+func DataAlreadyExist() interface{} {
+	return map[string]interface{}{
+		"status": "failed", "message": "Data Already Exist",
+	}
+}
+
 //BadRequestResponse default not found error response
 func BadRequestResponse() interface{} {
 	return map[string]interface{}{

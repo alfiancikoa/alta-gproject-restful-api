@@ -59,7 +59,7 @@ func UpdateProduct(newProduct *models.Product, Id int, user_id int) (*models.Pro
 	product.Title = newProduct.Title
 	product.Desc = newProduct.Desc
 	product.Price = newProduct.Price
-	product.Status = newProduct.Status
+	product.Stock = newProduct.Stock
 	product.Category_ID = newProduct.Category_ID
 	if tx.RowsAffected > 0 {
 		if err := config.DB.Save(&product).Error; err != nil {

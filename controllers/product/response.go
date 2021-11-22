@@ -5,7 +5,7 @@ type GetProductResponse struct {
 	Title       string
 	Desc        string
 	Price       int
-	Status      string
+	Stock       int
 	Category_ID int
 	User_ID     int
 }
@@ -14,7 +14,7 @@ type PostProduct struct {
 	Title       string `json:"title" form:"title"`
 	Desc        string `json:"desc" form:"desc"`
 	Price       int    `json:"price" form:"price"`
-	Status      string `json:"status" form:"status"`
+	Stock       int    `json:"stock" form:"stock"`
 	Category_ID int    `json:"category_id" form:"category_id"`
 }
 
@@ -26,7 +26,7 @@ type EditProduct struct {
 	Title       string `json:"title" form:"title"`
 	Desc        string `json:"desc" form:"desc"`
 	Price       int    `json:"price" form:"price"`
-	Status      string `json:"status" form:"status"`
+	Stock       int    `json:"stock" form:"stock"`
 	Category_ID int    `json:"category_id" form:"category_id"`
 }
 
