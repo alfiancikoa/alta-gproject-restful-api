@@ -1,0 +1,25 @@
+name: Deploy to EC2
+on: 
+  push:
+    branches:
+      - main
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy to EC2 using SSH
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.KEY }}
+        port: ${{ secrets.PORT }}
+        script: |
+          cd /home/ubuntu/app
+          git pull origin main
+          docker stop altaproject1
+          docker rm altaproject1
+          docker build -t alta-be4-app:latest .
+          docker run -d -p 80:8000 --name altaproject1 alta-be4-app:latest
