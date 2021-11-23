@@ -35,7 +35,7 @@ func New() *echo.Echo {
 	// ------------------------------------------------------------------
 	e.POST("/products/category", category.InsertCategoryController)
 	e.GET("/products/category", category.GetAllCategorysController)
-	eJWT.GET("/products", product.GetAllProductsController)
+	e.GET("/products", product.GetAllProductsController)
 	eJWT.GET("/products/:id", product.GetProductController)
 	eJWT.GET("/products/my", product.GetMyProductController)
 	eJWT.POST("/products", product.CreateProductsController)
@@ -50,7 +50,7 @@ func New() *echo.Echo {
 	eJWT.PUT("/carts/:id", cart.UpdateCartController)
 	eJWT.DELETE("/carts/:id", cart.DeleteCartController)
 	// ------------------------------------------------------------------
-	// CART ROUTER
+	// ORDER ROUTER
 	// ------------------------------------------------------------------
 	eJWT.POST("/orders", order.CreateNewOrderController)
 	eJWT.GET("/orders", order.GetOrderController)

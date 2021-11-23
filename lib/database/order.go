@@ -28,7 +28,6 @@ func GetCartItems(id []int, cart_id int) ([]models.CartItem, error) {
 
 func NewOrder(order models.PostOrderReq) (*models.Order, error) {
 	neworder := models.Order{
-		Address:     order.Address,
 		Total_Price: order.Total_Price,
 		Total_Qty:   order.Total_Qty,
 		User_ID:     order.User_ID,
@@ -42,6 +41,17 @@ func NewOrder(order models.PostOrderReq) (*models.Order, error) {
 		if err := tx.Error; err != nil {
 			return nil, tx.Error
 		}
+	}
+	// Create Addres reference by Order ID
+	address := models.Address{
+		Street:   order.Address.Street,
+		City:     order.Address.City,
+		State:    order.Address.State,
+		Zip:      order.Address.Zip,
+		Order_ID: neworder.ID,
+	}
+	if err := config.DB.Save(&address).Error; err != nil {
+		return nil, err
 	}
 	return &neworder, nil
 }

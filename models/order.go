@@ -8,10 +8,9 @@ import (
 
 type Order struct {
 	ID           int        `gorm:"primarykey; AUTO_INCREMENT" json:"id" form:"id"`
-	Address      string     `gorm:"type:varchar(255);not null" json:"address" form:"address"`
 	Total_Price  int        `gorm:"type:int;not null" json:"total_price" form:"total_price"`
 	Total_Qty    int        `gorm:"type:int;not null" json:"total_qty" form:"total_qty"`
-	Order_Status int        `gorm:"type:varchar;default:NULL" json:"order_status" form:"order_status"`
+	Order_Status string     `gorm:"type:varchar(100);default:null" json:"order_status" form:"order_status"`
 	User_ID      int        `json:"user_id" form:"user_id"`
 	Payment_ID   int        `json:"payment_id" form:"payment_id"`
 	CartItems    []CartItem `gorm:"foreignKey:Order_ID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
@@ -21,12 +20,19 @@ type Order struct {
 }
 
 type PostOrderReq struct {
-	Total_Price int    `json:"total_price" form:"total_price"`
-	Total_Qty   int    `json:"total_qty" form:"total_qty"`
-	CartItem_ID []int  `json:"cartitem_id" form:"cartitem_id"`
-	Payment_ID  int    `json:"payment_id" form:"payment_id"`
-	User_ID     int    `json:"user_id" form:"user_id"`
-	Address     string `json:"address" form:"address"`
+	Total_Price int            `json:"total_price" form:"total_price"`
+	Total_Qty   int            `json:"total_qty" form:"total_qty"`
+	CartItem_ID []int          `json:"cartitem_id" form:"cartitem_id"`
+	Payment_ID  int            `json:"payment_id" form:"payment_id"`
+	User_ID     int            `json:"user_id" form:"user_id"`
+	Address     AddressRequest `json:"address" form:"address"`
+}
+
+type AddressRequest struct {
+	Street string `json:"street" form:"street"`
+	City   string `json:"city" form:"city"`
+	State  string `json:"state" form:"state"`
+	Zip    int    `json:"zip" form:"zip"`
 }
 
 type GetOrderReq struct {
