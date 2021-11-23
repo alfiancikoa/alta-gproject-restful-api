@@ -16,14 +16,14 @@ func CreateProductsController(c echo.Context) error {
 	if err := c.Bind(&newProduct); err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
 	}
-	if newProduct.Title == "" || newProduct.Desc == "" || newProduct.Price <= 0 || newProduct.Status == "" || newProduct.Category_ID <= 0 {
+	if newProduct.Title == "" || newProduct.Desc == "" || newProduct.Price <= 0 || newProduct.Stock < 0 || newProduct.Category_ID <= 0 {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
 	product := models.Product{
 		Title:       newProduct.Title,
 		Desc:        newProduct.Desc,
 		Price:       newProduct.Price,
-		Status:      newProduct.Status,
+		Stock:       newProduct.Stock,
 		Category_ID: newProduct.Category_ID,
 	}
 	product.User_ID = middlewares.ExtractTokenUserId(c)
@@ -50,7 +50,7 @@ func GetAllProductsController(c echo.Context) error {
 		respon[i].Title = products[i].Title
 		respon[i].Desc = products[i].Desc
 		respon[i].Price = products[i].Price
-		respon[i].Status = products[i].Status
+		respon[i].Stock = products[i].Stock
 		respon[i].Category_ID = products[i].Category_ID
 		respon[i].User_ID = products[i].User_ID
 	}
@@ -74,7 +74,7 @@ func GetMyProductController(c echo.Context) error {
 		respon[i].Title = products[i].Title
 		respon[i].Desc = products[i].Desc
 		respon[i].Price = products[i].Price
-		respon[i].Status = products[i].Status
+		respon[i].Stock = products[i].Stock
 		respon[i].Category_ID = products[i].Category_ID
 		respon[i].User_ID = products[i].User_ID
 	}
@@ -103,7 +103,7 @@ func GetProductController(c echo.Context) error {
 		Title:       product.Title,
 		Desc:        product.Desc,
 		Price:       product.Price,
-		Status:      product.Status,
+		Stock:       product.Stock,
 		Category_ID: product.Category_ID,
 		User_ID:     product.User_ID,
 	}
@@ -123,14 +123,14 @@ func UpdateProductController(c echo.Context) error {
 	if err := c.Bind(&productRequest); err != nil {
 		return c.JSON(http.StatusBadRequest, responses.BadRequestResponse())
 	}
-	if productRequest.Title == "" || productRequest.Desc == "" || productRequest.Price <= 0 || productRequest.Status == "" {
+	if productRequest.Title == "" || productRequest.Desc == "" || productRequest.Price <= 0 || productRequest.Stock < 0 {
 		return c.JSON(http.StatusBadRequest, responses.InvalidFormatMethodInput())
 	}
 	product := models.Product{
 		Title:       productRequest.Title,
 		Desc:        productRequest.Desc,
 		Price:       productRequest.Price,
-		Status:      productRequest.Status,
+		Stock:       productRequest.Stock,
 		Category_ID: productRequest.Category_ID,
 	}
 	user_id := middlewares.ExtractTokenUserId(c)
