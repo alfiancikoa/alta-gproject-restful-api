@@ -4,6 +4,7 @@ import (
 	"alte/e-commerce/config"
 	"alte/e-commerce/constants"
 	"alte/e-commerce/controllers/user"
+	"alte/e-commerce/lib/database"
 	"alte/e-commerce/middlewares"
 	"alte/e-commerce/models"
 	"bytes"
@@ -51,7 +52,7 @@ var (
 		Title:       "Jaket Hoodie ERIGO",
 		Desc:        "size M",
 		Price:       50000,
-		Status:      "ready",
+		Stock:       1,
 		Category_ID: 1,
 		User_ID:     1,
 	}
@@ -76,7 +77,12 @@ func InsertMockDataProductToDB() error {
 	}
 	return nil
 }
+
+var xpass string
+
 func InsertMockDataUserToDB() error {
+	xpass, _ = database.EncryptPassword(mock_data_user.Password)
+	mock_data_user.Password = xpass
 	var err error
 	if err = config.DB.Save(&mock_data_user).Error; err != nil {
 		return err
@@ -84,11 +90,10 @@ func InsertMockDataUserToDB() error {
 	return nil
 }
 
-func TestGetProductSuccess(t *testing.T) {
+func TestGetAllProductSuccess(t *testing.T) {
 	// create database connection and create controller
 	e := InitEchoTestAPI()
 	InsertMockDataProductToDB()
-	// setting controller
 	req := httptest.NewRequest(http.MethodGet, "/products", nil)
 	rec := httptest.NewRecorder()
 	context := e.NewContext(req, rec)
@@ -107,7 +112,8 @@ func TestGetProductSuccess(t *testing.T) {
 		assert.Equal(t, "Jaket Hoodie ERIGO", product.Data[0].Title)
 	}
 }
-func TestGetProductFail(t *testing.T) {
+
+func TestGetAllProductFailed(t *testing.T) {
 	// create database connection and create controller
 	e := InitEchoTestAPI()
 	InsertMockDataProductToDB()
@@ -220,11 +226,42 @@ func TestGetProductByIdFailed(t *testing.T) {
 	})
 }
 
+func TestCreateProductSuccess(t *testing.T) {
+	e := InitEchoTestAPI()
+	InsertMockDataUserToDB()
+	body, err := json.Marshal(mock_data_product)
+	if err != nil {
+		t.Error(t, err, "error marshal")
+	}
+	var userDetail models.User
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
+	if tx.Error != nil {
+		t.Error(tx.Error)
+	}
+	token, err := middlewares.CreateToken(int(userDetail.ID))
+	if err != nil {
+		panic(err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/products", bytes.NewBuffer(body))
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	context := e.NewContext(req, res)
+	context.SetPath("/products")
+	middleware.JWT([]byte(constants.SECRET_JWT))(CreateProductsControllerTesting())(context)
+	var product SingleProductResponseSuccess
+	bodyRes := res.Body.String()
+	json.Unmarshal([]byte(bodyRes), &product)
+	assert.Equal(t, http.StatusOK, res.Code)
+	assert.Equal(t, "success create new product", product.Message)
+	assert.Equal(t, "success", product.Status)
+}
+
 func TestCreateProductFailed(t *testing.T) {
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -292,45 +329,16 @@ func TestCreateProductFailed(t *testing.T) {
 	})
 
 }
-func TestCreateProductSuccess(t *testing.T) {
-	e := InitEchoTestAPI()
-	InsertMockDataUserToDB()
-	body, err := json.Marshal(mock_data_product)
-	if err != nil {
-		t.Error(t, err, "error marshal")
-	}
-	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
-	if tx.Error != nil {
-		t.Error(tx.Error)
-	}
-	token, err := middlewares.CreateToken(int(userDetail.ID))
-	if err != nil {
-		panic(err)
-	}
-	req := httptest.NewRequest(http.MethodPost, "/products", bytes.NewBuffer(body))
-	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	res := httptest.NewRecorder()
-	context := e.NewContext(req, res)
-	context.SetPath("/products")
-	middleware.JWT([]byte(constants.SECRET_JWT))(CreateProductsControllerTesting())(context)
-	var product SingleProductResponseSuccess
-	bodyRes := res.Body.String()
-	json.Unmarshal([]byte(bodyRes), &product)
-	assert.Equal(t, http.StatusOK, res.Code)
-	assert.Equal(t, "Jaket Hoodie ERIGO", product.Data.Title)
-	assert.Equal(t, "size M", product.Data.Desc)
-}
+
 func TestUpdateProductSuccess(t *testing.T) {
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
 	InsertMockDataProductToDB()
 	var newdata = EditProduct{
-		Title:       "Jaket Hoodie",
+		Title:       "Jaket Hoodie Update",
 		Desc:        "size L",
 		Price:       1000,
-		Status:      "ready",
+		Stock:       1,
 		Category_ID: 1,
 	}
 	newbody, err := json.Marshal(newdata)
@@ -338,7 +346,7 @@ func TestUpdateProductSuccess(t *testing.T) {
 		t.Error(t, err, "error marshal")
 	}
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -359,8 +367,8 @@ func TestUpdateProductSuccess(t *testing.T) {
 	body := res.Body.String()
 	json.Unmarshal([]byte(body), &product)
 	assert.Equal(t, http.StatusOK, res.Code)
-	assert.Equal(t, "Jaket Hoodie", product.Data.Title)
-	assert.Equal(t, "size L", product.Data.Desc)
+	assert.Equal(t, "product update successful", product.Message)
+	assert.Equal(t, "success", product.Status)
 }
 
 func TestUpdateProductFailed(t *testing.T) {
@@ -368,10 +376,10 @@ func TestUpdateProductFailed(t *testing.T) {
 	InsertMockDataUserToDB()
 	InsertMockDataProductToDB()
 	var newdata = EditProduct{
-		Title:       "Jaket Hoodie",
+		Title:       "Jaket Hoodie Update",
 		Desc:        "size L",
 		Price:       1000,
-		Status:      "ready",
+		Stock:       1,
 		Category_ID: 1,
 	}
 	newbody, err := json.Marshal(newdata)
@@ -379,7 +387,7 @@ func TestUpdateProductFailed(t *testing.T) {
 		t.Error(t, err, "error marshal")
 	}
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -489,7 +497,7 @@ func TestDeleteProductSuccess(t *testing.T) {
 	InsertMockDataUserToDB()
 	InsertMockDataProductToDB()
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -511,7 +519,7 @@ func TestDeleteProductSuccess(t *testing.T) {
 	json.Unmarshal([]byte(body), &product)
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Equal(t, "success", product.Status)
-	assert.Equal(t, "product succesfully deleted", product.Message)
+	assert.Equal(t, "product deleted successfully", product.Message)
 }
 
 func TestDeleteProductFailed(t *testing.T) {
@@ -520,7 +528,7 @@ func TestDeleteProductFailed(t *testing.T) {
 	t.Run("TestDeleteProductDetail_NotFound", func(t *testing.T) {
 		InsertMockDataProductToDB()
 		var userDetail models.User
-		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 		if tx.Error != nil {
 			t.Error(tx.Error)
 		}
@@ -547,7 +555,7 @@ func TestDeleteProductFailed(t *testing.T) {
 	t.Run("TestDeleteProductDetail_InvalidMethod", func(t *testing.T) {
 		InsertMockDataProductToDB()
 		var userDetail models.User
-		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 		if tx.Error != nil {
 			t.Error(tx.Error)
 		}
@@ -575,7 +583,7 @@ func TestDeleteProductFailed(t *testing.T) {
 		InsertMockDataUserToDB()
 		InsertMockDataProductToDB()
 		var userDetail models.User
-		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+		tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 		if tx.Error != nil {
 			t.Error(tx.Error)
 		}
@@ -606,9 +614,8 @@ func TestGetMyProductSuccess(t *testing.T) {
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
 	InsertMockDataProductToDB()
-
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}
@@ -637,9 +644,8 @@ func TestGetMyProductFailed(t *testing.T) {
 	e := InitEchoTestAPI()
 	InsertMockDataUserToDB()
 	InsertMockDataProductToDB()
-
 	var userDetail models.User
-	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, logininfo.Password).First(&userDetail)
+	tx := config.DB.Where("email = ? AND password = ?", logininfo.Email, xpass).First(&userDetail)
 	if tx.Error != nil {
 		t.Error(tx.Error)
 	}

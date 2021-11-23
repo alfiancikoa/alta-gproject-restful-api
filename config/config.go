@@ -45,6 +45,11 @@ func InitalMigration() {
 	DB.AutoMigrate(&models.User{})
 	DB.AutoMigrate(&models.Category{})
 	DB.AutoMigrate(&models.Product{})
+	DB.AutoMigrate(&models.CartItem{})
+	DB.AutoMigrate(&models.Cart{})
+	DB.AutoMigrate(&models.Payment{})
+	DB.AutoMigrate(&models.Order{})
+	DB.AutoMigrate(&models.Address{})
 	DB.AutoMigrate(&models.Ship_Type{})
 	DB.AutoMigrate(&models.Shipping{})
 }
