@@ -19,7 +19,6 @@ jobs:
         script: |
           cd /home/ubuntu/app
           git pull origin main
-          sudo su
           docker stop altaproject1
           docker rm altaproject1
           docker build -t alta-be4-app:latest .
