@@ -60,7 +60,6 @@ func GetOrderController(c echo.Context) error {
 			cartRespon[i].Products = *product
 		}
 		orderRespon[index].Order_ID = idOrder.ID
-		orderRespon[index].Deliver_To = idOrder.Address
 		orderRespon[index].Total_Price = idOrder.Total_Price
 		orderRespon[index].Total_Qty = idOrder.Total_Qty
 		orderRespon[index].User_ID = idOrder.User_ID

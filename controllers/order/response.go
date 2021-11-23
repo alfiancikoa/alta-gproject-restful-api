@@ -13,7 +13,6 @@ type PostNewOrder struct {
 
 type OrderRespon struct {
 	Order_ID    int
-	Deliver_To  string
 	Total_Price int
 	Total_Qty   int
 	User_ID     int
