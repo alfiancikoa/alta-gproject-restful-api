@@ -141,7 +141,6 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
 [![Gmail: Supriadi](https://img.shields.io/badge/-Supriadi-maroon?style=flat&logo=gmail)]()
 [![GitHub Supriadi](https://img.shields.io/badge/-sprdx-white?style=flat&logo=github&logoColor=black)](https://github.com/sprdx)
 
-<p align="right">(<a href="#top">back to top</a>)</p>
-<h3>
-<p align="center">:copyright: 2021 | Built with :heart: from us</p>
+
+<p align="center">:copyright: 2021 | ANS</p>
 </h3>
