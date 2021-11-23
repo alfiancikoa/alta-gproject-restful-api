@@ -45,13 +45,13 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
  
 <div>
   
-| Feature User | Format JSON |
+| Feature User | Format JSON/Endpoint |
 | --- | --- |
-| [e.POST("/users", user.CreateUserController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) |  |
-| [e.POST("/login", user.LoginUsersController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) |  |
-| [eJWT.GET("/users/:id", user.GetUserByIdController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) |  |
-| [eJWT.PUT("/users/:id", user.UpdateUserController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) |  |
-| [eJWT.DELETE("/users/:id", user.DeleteUserController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) |  |
+| [e.POST("/users", user.CreateUserController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) | {"name", "email", "password", "phonenumber", "gender", "birth"} |
+| [e.POST("/login", user.LoginUsersController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) | {"email", "password"} |
+| [eJWT.GET("/users/:id", user.GetUserByIdController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) | <endpoint>/users/:id |
+| [eJWT.PUT("/users/:id", user.UpdateUserController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) | {"name", "email", "password", "phonenumber", "gender", "birth"} |
+| [eJWT.DELETE("/users/:id", user.DeleteUserController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/user/user.go) | <endpoint>/users/:id |
 
 </details>  
 
@@ -66,10 +66,10 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
   Category berfungsi untuk mengelompokkan berbagai product agar user lebih mudah mencari barang yang dibutuhkan, terdapat fitur Insert untuk membuat category product,
   dan GET merupakan fitur untuk user mendapatkan product sesuai Category.
   
-| Feature Category | Format JSON |
+| Feature Category | Format JSON/Endpoint |
 | --- | --- |
-| [e.POST("/products/category", category.InsertCategoryController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/category/category.go) | |
-| [e.GET("/products/category", category.GetAllCategorysController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/category/category.go) | |
+| [e.POST("/products/category", category.InsertCategoryController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/category/category.go) | {"title"}  |
+| [e.GET("/products/category", category.GetAllCategorysController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/category/category.go) | <endpoint>/products/category |
 
 </details>
 
@@ -83,12 +83,12 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
   
 | Feature Products | Format JSON |
 | --- | --- |
-| [e.GET("/products", product.GetAllProductsController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | |
-| [eJWT.GET("/products/:id", product.GetProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | |
-| [eJWT.GET("/products/my", product.GetMyProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | |
-| [eJWT.POST("/products", product.CreateProductsController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | |
-| [eJWT.DELETE("/products/:id", product.DeleteProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | |
-| [eJWT.PUT("/products/:id", product.UpdateProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | |
+| [e.GET("/products", product.GetAllProductsController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | <endpoint>/products |
+| [eJWT.GET("/products/:id", product.GetProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | <endpoint>/products/:id |
+| [eJWT.GET("/products/my", product.GetMyProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | <endpoint>/products/my |
+| [eJWT.POST("/products", product.CreateProductsController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | { "title", "desc", "price", "stock", "category_id"} |
+| [eJWT.DELETE("/products/:id", product.DeleteProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | <endpoint>/products/:id |
+| [eJWT.PUT("/products/:id", product.UpdateProductController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/product/product.go) | { "title", "desc", "price", "stock", "category_id"} |
 
 </details>
 
@@ -100,12 +100,12 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
 | --- | --- |
   --->
   
-| Feature Cart | Format JSON |
+| Feature Cart | Format JSON/Endpoint |
 | --- | --- |
-| [eJWT.POST("/carts", cart.CreateCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | |
-| [eJWT.GET("/carts/my", cart.GetCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | |
-| [eJWT.PUT("/carts/:id", cart.UpdateCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | |
-| [eJWT.DELETE("/carts/:id", cart.DeleteCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | |
+| [eJWT.POST("/carts", cart.CreateCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | {"product_id", "qty"} |
+| [eJWT.GET("/carts/my", cart.GetCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | <endpoint>/carts/my |
+| [eJWT.PUT("/carts/:id", cart.UpdateCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | {"qty"} |
+| [eJWT.DELETE("/carts/:id", cart.DeleteCartController)](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/cart/cart.go) | <endpoint>/carts/:id |
 
 </details>
 
@@ -119,8 +119,8 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
   
 | Feature Order | Format JSON |
 | --- | --- |
-| [eJWT.POST("/orders", order.CreateNewOrderController))](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/order/order.go) | |
-| [eJWT.GET("/orders", order.GetOrderController))](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/order/order.go) | |
+| [eJWT.POST("/orders", order.CreateNewOrderController))](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/order/order.go) | { "cartitem_id", "payment_id", "address" { "street", "City", "state", "zip" } } |
+| [eJWT.GET("/orders", order.GetOrderController))](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/order/order.go) | <endpoint>/orders |
 
 </details>
       
