@@ -12,15 +12,21 @@ type PostNewOrder struct {
 }
 
 type OrderRespon struct {
-	Order_ID    int
-	Total_Price int
-	Total_Qty   int
-	User_ID     int
-	CartItem_ID []CartItemRespon
+	Order_ID           int
+	Transaction_Number string
+	Status             string
+	Total_Price        int
+	Total_Qty          int
+	User_ID            int
+	CartItem_ID        []CartItemRespon
 }
 type CartItemRespon struct {
 	ID          int
 	Total_Qty   int
 	Total_Price int
 	Products    models.ResponOrderProduct
+}
+
+type ConfirmRequest struct {
+	Transaction_Number string `json:"transaction_number" form:"transaction_number"`
 }

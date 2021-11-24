@@ -54,5 +54,8 @@ func New() *echo.Echo {
 	// ------------------------------------------------------------------
 	eJWT.POST("/orders", order.CreateNewOrderController)
 	eJWT.GET("/orders", order.GetOrderController)
+	eJWT.GET("/orders/history", order.GetOrderHistoryController)
+	eJWT.DELETE("/orders/:id", order.CancellOrderController)
+	e.POST("/orders/confirm", order.ConfirmOrderController)
 	return e
 }
