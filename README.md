@@ -25,6 +25,7 @@
 ![Golang](https://img.shields.io/badge/-Golang-05122A?style=flat&logo=go&logoColor=4479A1)&nbsp;
 ![AWS](https://img.shields.io/badge/-AWS-05122A?style=flat&logo=amazon)&nbsp;
 ![Postman](https://img.shields.io/badge/-Postman-05122A?style=flat&logo=postman)&nbsp;
+![Docker](https://img.shields.io/badge/-Docker-05122A?style=flat&logo=docker)&nbsp;
 
 <!-- ABOUT THE PROJECT -->
 ### 💻 &nbsp;About The Project
@@ -80,6 +81,7 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
   | Command | Description |
 | --- | --- |
   --->
+  User dapat mem-posting berbagai product untuk dijual kepada user lain, terdapat beberapa fitur seperti melihat seluruh product, mencari product sesuai dengan id product, melihat product yang dipost user, menambahkan dan meng-update product dengan detail harga, stok untuk memudahkan user lain yang akan membeli productnya, serta fitur delete yang memungkinkan user menghapus product yang sudah tidak dijual. 
   
 | Feature Products | Format JSON |
 | --- | --- |
@@ -99,6 +101,7 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
   | Command | Description |
 | --- | --- |
   --->
+  Cart merupakan fitur untuk menampung berbagai product yang akan dibeli oleh user, adapun fiturnya ada create dimana user menambahkan product ke dalam keranjang, ada GET dimana user bisa melihat barang apa aja yang ada di dalam keranjang, ada fitur update dimana user bisa merubah jumlah product yang ada didalam keranjang.  
   
 | Feature Cart | Format JSON/Endpoint |
 | --- | --- |
@@ -110,14 +113,15 @@ dilengkapi dengan berbagai fitur yang memungkinkan user untuk mengakses data yan
 </details>
 
 <details>
-<summary>💳&nbsp;Order</summary>
+<summary>💳&nbsp;Purchase</summary>
   
   <!---
   | Command | Description |
 | --- | --- |
   --->
+  Merupakan fitur untuk dimana user melakukan pembayaran sesuai product yang dipilih dari cart, adapun fiturnya post untuk melakukan pembayaran, dan get berfungsi untuk menemukan product yang sudah dibayar.
   
-| Feature Order | Format JSON |
+| Feature Purchase | Format JSON |
 | --- | --- |
 | [eJWT.POST("/orders", order.CreateNewOrderController))](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/order/order.go) | { "cartitem_id", "payment_id", "address" { "street", "City", "state", "zip" } } |
 | [eJWT.GET("/orders", order.GetOrderController))](https://github.com/alfiancikoa/alta-gproject-restful-api/blob/main/controllers/order/order.go) | <endpoint>/orders |
