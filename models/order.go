@@ -7,16 +7,17 @@ import (
 )
 
 type Order struct {
-	ID           int        `gorm:"primarykey; AUTO_INCREMENT" json:"id" form:"id"`
-	Total_Price  int        `gorm:"type:int;not null" json:"total_price" form:"total_price"`
-	Total_Qty    int        `gorm:"type:int;not null" json:"total_qty" form:"total_qty"`
-	Order_Status string     `gorm:"type:varchar(100);default:null" json:"order_status" form:"order_status"`
-	User_ID      int        `json:"user_id" form:"user_id"`
-	Payment_ID   int        `json:"payment_id" form:"payment_id"`
-	CartItems    []CartItem `gorm:"foreignKey:Order_ID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    gorm.DeletedAt `gorm:"index"`
+	ID                 int        `gorm:"primarykey; AUTO_INCREMENT" json:"id" form:"id"`
+	Total_Price        int        `gorm:"type:int;not null" json:"total_price" form:"total_price"`
+	Total_Qty          int        `gorm:"type:int;not null" json:"total_qty" form:"total_qty"`
+	Order_Status       string     `gorm:"type:varchar(100);default:'waiting'" json:"order_status" form:"order_status"`
+	Transaction_Number string     `gorm:"type:varchar(100);default:null" json:"transaction_number" form:"transaction_number"`
+	User_ID            int        `json:"user_id" form:"user_id"`
+	Payment_ID         int        `json:"payment_id" form:"payment_id"`
+	CartItems          []CartItem `gorm:"foreignKey:Order_ID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	DeletedAt          gorm.DeletedAt `gorm:"index"`
 }
 
 type PostOrderReq struct {
